@@ -78,31 +78,20 @@ class Program
     static void Main()
     {
         var edges = new List<(string, string)>();
-        //string line;
+        string line;
 
-        //while ((line = Console.ReadLine()) != null)
-        //{
-        //    line = line.Trim();
-        //    if (!string.IsNullOrEmpty(line))
-        //    {
-        //        var parts = line.Split('-');
-        //        if (parts.Length == 2)
-        //        {
-        //            edges.Add((parts[0], parts[1]));
-        //        }
-        //    }
-        //} 
-        edges.Add(("a", "b"));
-        edges.Add(("b", "c"));
-        edges.Add(("c", "d"));
-        edges.Add(("c", "e"));
-        edges.Add(("A", "d"));
-        edges.Add(("A", "e"));
-        edges.Add(("c", "f"));
-        edges.Add(("c", "g"));
-        edges.Add(("f", "B"));
-        edges.Add(("g", "B"));
-
+        while ((line = Console.ReadLine()) != null)
+        {
+            line = line.Trim();
+            if (!string.IsNullOrEmpty(line))
+            {
+                var parts = line.Split('-');
+                if (parts.Length == 2)
+                {
+                    edges.Add((parts[0], parts[1]));
+                }
+            }
+        }
 
         var result = Solve(edges);
         foreach (var edge in result)
