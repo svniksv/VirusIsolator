@@ -14,7 +14,8 @@ class Program
 
         while (!graph.IsIsolated())
         {
-            var currentPath = BFS(graph, graph.Virus);
+            var currentPath = new List<(int, int)>();
+            currentPath = BFS(graph, graph.Virus);
             if (!first) graph.Virus = currentPath.Last().Item2;
             else first = false;
             result.Add(graph.RemoveConnection(currentPath[0]));
@@ -28,6 +29,10 @@ class Program
         var visited = new HashSet<int>();
         var queue = new Queue<int>();
         var mainPath = new List<(int, int)>();
+
+        int[] distances = new int[graph.Nodes.Length];
+        for (int i = 0; i < distances.Length; i++) distances[i] = -1;
+        distances[start] = 0;
 
         queue.Enqueue(start);
 
@@ -44,21 +49,19 @@ class Program
 
                 queue.Enqueue(connection); //добавляем соседей в очередь
                 mainPath.Add((current, connection)); // сохраняем путь
+                distances[connection] = distances[current] + 1;
             }
         }
-
-        //ищем путь до ближайшего шлюза
-        var shortestPath = new List<(int, int)>();
-        int end = graph.Nodes.Length;
-        foreach (var p in mainPath)
+        //ищем ближайший шлюз
+        int end = Array.FindIndex(graph.Nodes, (node) => node.All(char.IsUpper));
+        while (distances[end] == -1) end++;
+        if (end != graph.Nodes.Length - 1)
         {
-            if (graph.Nodes[p.Item2].All(char.IsUpper))
-            {
-                if (p.Item2 < end) end = p.Item2;
-            }
-            else if (end != graph.Nodes.Length) break;
+            for (int i = end + 1; i < graph.Nodes.Length; i++)
+                if (distances[end] > distances[i] && distances[i] != -1) end = i;
         }
 
+        var shortestPath = new List<(int, int)>();
         while (end != start)
         {
             foreach (var p in mainPath)
@@ -92,6 +95,7 @@ class Program
                 }
             }
         }
+
 
         var result = Solve(edges);
         foreach (var edge in result)
