@@ -96,7 +96,6 @@ class Program
             }
         }
 
-
         var result = Solve(edges);
         foreach (var edge in result)
         {
