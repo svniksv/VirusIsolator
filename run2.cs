@@ -15,7 +15,7 @@ class Program
         while (!graph.IsIsolated())
         {
             var currentPath = BFS(graph, graph.Virus);
-            if (!first) graph.Virus = currentPath.Last().Item1;
+            if (!first) graph.Virus = currentPath.Last().Item2;
             else first = false;
             result.Add(graph.RemoveConnection(currentPath[0]));
         }
