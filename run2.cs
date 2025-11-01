@@ -16,7 +16,7 @@ class Program
         {
             var currentPath = new List<(int, int)>();
             currentPath = BFS(graph, graph.Virus);
-            if (!first) graph.Virus = currentPath.Last().Item2;
+            if (!first) graph.Virus = currentPath.Last().Item1;
             else first = false;
             result.Add(graph.RemoveConnection(currentPath[0]));
         }
@@ -80,21 +80,40 @@ class Program
 
     static void Main()
     {
-        var edges = new List<(string, string)>();
-        string line;
+        //var edges = new List<(string, string)>();
+        //string line;
 
-        while ((line = Console.ReadLine()) != null)
-        {
-            line = line.Trim();
-            if (!string.IsNullOrEmpty(line))
-            {
-                var parts = line.Split('-');
-                if (parts.Length == 2)
-                {
-                    edges.Add((parts[0], parts[1]));
-                }
-            }
-        }
+        //while ((line = Console.ReadLine()) != null)
+        //{
+        //    line = line.Trim();
+        //    if (!string.IsNullOrEmpty(line))
+        //    {
+        //        var parts = line.Split('-');
+        //        if (parts.Length == 2)
+        //        {
+        //            edges.Add((parts[0], parts[1]));
+        //        }
+        //    }
+        //}
+
+        var edges = new List<(string, string)> {
+    ("a", "b"),
+    ("b", "c"),
+    ("c", "d"),
+    ("d", "e"),
+    ("e", "f"),
+    ("f", "g"),
+    ("g", "A"),
+    ("a", "h"),
+    ("h", "i"),
+    ("i", "j"),
+    ("j", "k"),
+    ("k", "l"),
+    ("l", "B"),
+    ("c", "C"),
+    ("d", "D"),
+    ("e", "E")
+};
 
         var result = Solve(edges);
         foreach (var edge in result)
