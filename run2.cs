@@ -28,7 +28,6 @@ class Program
     {
         var visited = new HashSet<int>();
         var queue = new Queue<int>();
-        var mainPath = new List<(int, int)>();
 
         int[] distances = new int[graph.Nodes.Length];
         for (int i = 0; i < distances.Length; i++) distances[i] = -1;
@@ -48,7 +47,6 @@ class Program
                 if (visited.Contains(connection)) continue; // пропускаем исследованных соседей
 
                 queue.Enqueue(connection); //добавляем соседей в очередь
-                mainPath.Add((current, connection)); // сохраняем путь
                 if (distances[connection] == -1 || distances[current] + 1 < distances[connection]) distances[connection] = distances[current] + 1;
             }
         }
@@ -64,17 +62,16 @@ class Program
         var shortestPath = new List<(int, int)>();
         while (end != start)
         {
-            foreach (var p in mainPath)
+            for (int i = 0; i < distances.Length; i++)
             {
-                if (p.Item2 == end)
+                if (distances[i] == distances[end] - 1 && graph.GraphMatrix[i,end] == 1)
                 {
-                    shortestPath.Add((p.Item2, p.Item1));
-                    end = p.Item1;
+                    shortestPath.Add((end, i));
+                    end = i;
                     break;
                 }
             }
         }
-
         return shortestPath;
     }
 
