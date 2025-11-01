@@ -8,7 +8,6 @@ class Program
     static List<string> Solve(List<(string, string)> edges)
     {
         var result = new List<string>();
-
         Graph graph = new Graph(edges);
         bool first = true;
 
