@@ -8,15 +8,16 @@ class Program
     static List<string> Solve(List<(string, string)> edges)
     {
         var result = new List<string>();
-
         Graph graph = new Graph(edges);
         bool first = true;
 
         while (!graph.IsIsolated())
         {
-            var currentPath = BFS(graph, graph.Virus);
+            var currentPath = new List<(int, int)>();
+            currentPath = BFS(graph, graph.Virus);
             if (!first) graph.Virus = currentPath.Last().Item1;
             else first = false;
+            //Console.WriteLine("Virus in " + graph.Nodes[graph.Virus]);
             result.Add(graph.RemoveConnection(currentPath[0]));
         }
 
@@ -27,7 +28,10 @@ class Program
     {
         var visited = new HashSet<int>();
         var queue = new Queue<int>();
-        var mainPath = new List<(int, int)>();
+
+        int[] distances = new int[graph.Nodes.Length];
+        for (int i = 0; i < distances.Length; i++) distances[i] = -1;
+        distances[start] = 0;
 
         queue.Enqueue(start);
 
@@ -43,36 +47,76 @@ class Program
                 if (visited.Contains(connection)) continue; // пропускаем исследованных соседей
 
                 queue.Enqueue(connection); //добавляем соседей в очередь
-                mainPath.Add((current, connection)); // сохраняем путь
+                if (distances[connection] == -1 || distances[current] + 1 < distances[connection]) distances[connection] = distances[current] + 1; // заполняем массив длин
             }
         }
+        //ищем ближайший шлюз
+        int end = Array.FindIndex(graph.Nodes, (node) => node.All(char.IsUpper)); // считаем, что искомый шлюз - А
+        while (distances[end] == -1) end++; //если выбранный шлюз уже отключен, берём следующий.
+        if (end != graph.Nodes.Length - 1) // если осталось больше 1 шлюза, то ищем кратчайший или лексикографически меньший
+        {
+            for (int i = end + 1; i < graph.Nodes.Length; i++)
+                if (distances[end] > distances[i] && distances[i] != -1) end = i;
+        }
 
-        //ищем путь до ближайшего шлюза
         var shortestPath = new List<(int, int)>();
-        int end = graph.Nodes.Length;
-        foreach (var p in mainPath)
+        List<string> allShortPath = RecreatePath(graph, distances, end);
+        //реверсируем и сортируем все пути, чтобы найти лексикографически меньший
+        for (int i = 0; i < allShortPath.Count; i++)
+            allShortPath[i] = new string(allShortPath[i].ToCharArray().Reverse().ToArray());
+
+        //сортируем массив
+        allShortPath.Sort((path1, path2) =>
         {
-            if (graph.Nodes[p.Item2].All(char.IsUpper))
+            var nodes1 = path1.Split('-');
+            var nodes2 = path2.Split('-');
+
+            for (int i = 0; i < path1.Length; i++)
             {
-                if (p.Item2 < end) end = p.Item2;
+                int comparison = string.Compare(nodes1[i], nodes2[i]);
+                if (comparison != 0) return comparison;
             }
-            else if (end != graph.Nodes.Length) break;
+            return 0;
+        });
+
+        var firstPath = allShortPath[0].Split("-");
+        //восстанавливаем кратчайший маршрут с конца по индексам
+        for (int i = firstPath.Count() - 1; i > 0; i--)
+        {
+            shortestPath.Add((Array.IndexOf(graph.Nodes, firstPath[i].ToString()), Array.IndexOf(graph.Nodes, firstPath[i - 1].ToString())));
         }
 
-        while (end != start)
-        {
-            foreach (var p in mainPath)
-            {
-                if (p.Item2 == end)
-                {
-                    shortestPath.Add((p.Item2, p.Item1));
-                    end = p.Item1;
-                    break;
-                }
-            }
-        }
+        //foreach (var path in shortestPath) Console.WriteLine(graph.Nodes[path.Item1] + "-" + graph.Nodes[path.Item2]);
+        //Console.WriteLine("--------");
 
         return shortestPath;
+    }
+
+    //получаем все возмжные кратчайшие пути до шлюза
+    static List<string> RecreatePath(Graph graph, int[] dist, int end)
+    {
+        List<string> path = new List<string>();
+
+        for (int i = 0; i < dist.Length; i++)
+        {
+            if (dist[i] == dist[end] - 1 && graph.GraphMatrix[i, end] == 1)
+            {
+                if (dist[i] == dist[graph.Virus])
+                {
+                    path.Add(graph.Nodes[end] + "-" + graph.Nodes[i]);
+                    return path;
+                }
+                var next = RecreatePath(graph, dist, i);
+                foreach (var n in next) path.Add(graph.Nodes[end] + "-" + n);
+            }
+        }
+
+        return path;
+    }
+
+    static void SortPath (ref List<string> pathes)
+    {
+
     }
 
     static void Main()
