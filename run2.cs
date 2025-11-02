@@ -7,24 +7,22 @@ class Program
 
     static List<string> Solve(List<(string, string)> edges)
     {
-        var result = new List<string>();
         Graph graph = new Graph(edges);
         bool first = true;
 
         while (!graph.IsIsolated())
         {
             var currentPath = new List<(int, int)>();
-            currentPath = BFS(graph, graph.Virus);
+            currentPath = BFS(ref graph, graph.Virus);
             if (!first) graph.Virus = currentPath.Last().Item1;
             else first = false;
             //Console.WriteLine("Virus in " + graph.Nodes[graph.Virus]);
-            result.Add(graph.RemoveConnection(currentPath[0]));
         }
 
-        return result;
+        return graph.Determination;
     }
 
-    static List<(int, int)> BFS(Graph graph, int start)
+    static List<(int, int)> BFS(ref Graph graph, int start)
     {
         var visited = new HashSet<int>();
         var queue = new Queue<int>();
@@ -59,6 +57,8 @@ class Program
                 if (distances[end] > distances[i] && distances[i] != -1) end = i;
         }
 
+        
+
         var shortestPath = new List<(int, int)>();
         List<string> allShortPath = RecreatePath(graph, distances, end);
         //реверсируем и сортируем все пути, чтобы найти лексикографически меньший
@@ -84,6 +84,20 @@ class Program
         for (int i = firstPath.Count() - 1; i > 0; i--)
         {
             shortestPath.Add((Array.IndexOf(graph.Nodes, firstPath[i].ToString()), Array.IndexOf(graph.Nodes, firstPath[i - 1].ToString())));
+        }
+
+        //отключение шлюза
+        if (graph.GraphMatrix[graph.Virus, end] == 1) graph.Determination.Add(graph.RemoveConnection((end, graph.Virus)));
+        else
+        {
+            for (int i = 0; i < graph.Nodes.Length; i++)
+            {
+                if (graph.GraphMatrix[end, i] == 1)
+                {
+                    graph.Determination.Add(graph.RemoveConnection((end, i)));
+                    break;
+                }
+            }
         }
 
         //foreach (var path in shortestPath) Console.WriteLine(graph.Nodes[path.Item1] + "-" + graph.Nodes[path.Item2]);
@@ -114,10 +128,6 @@ class Program
         return path;
     }
 
-    static void SortPath (ref List<string> pathes)
-    {
-
-    }
 
     static void Main()
     {
@@ -150,6 +160,7 @@ public class Graph
     public int[,] GraphMatrix;
     public string[] Nodes;
     public int Virus;
+    public List<string> Determination = new List<string>();
 
     public Graph(List<(string, string)> edges)
     {
