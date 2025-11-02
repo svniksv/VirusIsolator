@@ -46,32 +46,53 @@ class Program
                 if (visited.Contains(connection)) continue; // пропускаем исследованных соседей
 
                 queue.Enqueue(connection); //добавляем соседей в очередь
-                if (distances[connection] == -1 || distances[current] + 1 < distances[connection]) distances[connection] = distances[current] + 1;
+                if (distances[connection] == -1 || distances[current] + 1 < distances[connection]) distances[connection] = distances[current] + 1; // заполняем массив длин
             }
         }
         //ищем ближайший шлюз
-        int end = Array.FindIndex(graph.Nodes, (node) => node.All(char.IsUpper));
-        while (distances[end] == -1) end++;
-        if (end != graph.Nodes.Length - 1)
+        int end = Array.FindIndex(graph.Nodes, (node) => node.All(char.IsUpper)); // считаем, что искомый шлюз - А
+        while (distances[end] == -1) end++; //если выбранный шлюз уже отключен, берём следующий.
+        if (end != graph.Nodes.Length - 1) // если осталось больше 1 шлюза, то ищем кратчайший или лексикографически меньший
         {
             for (int i = end + 1; i < graph.Nodes.Length; i++)
                 if (distances[end] > distances[i] && distances[i] != -1) end = i;
         }
 
-        var shortestPath = new List<(int, int)>();
-        while (end != start)
+        var shortestPath = new List<(int, int)>(); 
+        List<string> allShortPath = RecreatePath(graph, distances, end);
+        //реверсируем и сортируем все пути, чтобы найти лексикографически меньший
+        for (int i = 0; i < allShortPath.Count; i++)
+            allShortPath[i] = new string(allShortPath[i].ToCharArray().Reverse().ToArray());
+        allShortPath.Sort();
+        //восстанавливаем кратчайший маршрут с конца по индексам
+        for (int i = allShortPath[0].Length - 1; i > 0; i--)
         {
-            for (int i = 0; i < distances.Length; i++)
+            shortestPath.Add((Array.IndexOf(graph.Nodes, allShortPath[0][i].ToString()), Array.IndexOf(graph.Nodes, allShortPath[0][i-1].ToString())));
+        }
+        
+        return shortestPath;
+    }
+
+    //получаем все возмжные кратчайшие пути до шлюза
+    static List<string> RecreatePath(Graph graph, int[] dist, int end)
+    {
+        List<string> path = new List<string>();
+
+        for (int i = 0; i < dist.Length;i++)
+        {
+            if (dist[i] == dist[end] - 1 && graph.GraphMatrix[i,end] == 1)
             {
-                if (distances[i] == distances[end] - 1 && graph.GraphMatrix[i,end] == 1)
+                if (dist[i] == dist[graph.Virus])
                 {
-                    shortestPath.Add((end, i));
-                    end = i;
-                    break;
+                    path.Add(graph.Nodes[end] + graph.Nodes[i]);
+                    return path;
                 }
+                var next = RecreatePath(graph, dist, i);
+                foreach (var n in next) path.Add(graph.Nodes[end] + n);
             }
         }
-        return shortestPath;
+
+        return path;
     }
 
     static void Main()
