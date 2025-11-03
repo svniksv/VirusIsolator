@@ -12,16 +12,13 @@ class Program
 
         while (!graph.IsIsolated())
         {
-            var currentPath = new List<(int, int)>();
-            currentPath = BFS(ref graph, graph.Virus);
-            if (!first) graph.Virus = currentPath.Last().Item1;
-            else first = false;
+            BFS(ref graph, graph.Virus, ref first);
         }
 
         return graph.Determination;
     }
 
-    static List<(int, int)> BFS(ref Graph graph, int start)
+    static void BFS(ref Graph graph, int start, ref bool first)
     {
         var visited = new HashSet<int>();
         var queue = new Queue<int>();
@@ -57,8 +54,6 @@ class Program
         }
 
         
-
-        var shortestPath = new List<(int, int)>();
         List<string> allShortPath = RecreatePath(graph, distances, end);
         //реверсируем и сортируем все пути, чтобы найти лексикографически меньший
         for (int i = 0; i < allShortPath.Count; i++)
@@ -79,11 +74,9 @@ class Program
         });
 
         var firstPath = allShortPath[0].Split("-");
-        //восстанавливаем кратчайший маршрут с конца по индексам
-        for (int i = firstPath.Count() - 1; i > 0; i--)
-        {
-            shortestPath.Add((Array.IndexOf(graph.Nodes, firstPath[i].ToString()), Array.IndexOf(graph.Nodes, firstPath[i - 1].ToString())));
-        }
+        //двигаем вирус в каждой итерации кроме первой 
+        if (!first) graph.Virus = Array.IndexOf(graph.Nodes, firstPath[1]);
+        else first = false;
 
         //отключение шлюза
         if (graph.GraphMatrix[graph.Virus, end] == 1) graph.Determination.Add(graph.RemoveConnection((end, graph.Virus)));
@@ -98,11 +91,6 @@ class Program
                 }
             }
         }
-
-        //foreach (var path in shortestPath) Console.WriteLine(graph.Nodes[path.Item1] + "-" + graph.Nodes[path.Item2]);
-        //Console.WriteLine("--------");
-
-        return shortestPath;
     }
 
     //получаем все возмжные кратчайшие пути до шлюза
@@ -231,8 +219,29 @@ public class Graph
             }
         }
 
-        knots.Sort();
-        gateway.Sort();
+        knots.Sort((x, y) =>
+        {
+            if (x.Length != y.Length) return x.Length.CompareTo(y.Length);
+            int minLength = Math.Min(x.Length, y.Length);
+            for (int i = 0; i < minLength; i++)
+            {
+                if (x[i] != y[i])
+                    return x[i].CompareTo(y[i]);
+            }
+            return x.Length.CompareTo(y.Length);
+        });
+
+        gateway.Sort((x, y) =>
+        {
+            if (x.Length != y.Length) return x.Length.CompareTo(y.Length);
+            int minLength = Math.Min(x.Length, y.Length);
+            for (int i = 0; i < minLength; i++)
+            {
+                if (x[i] != y[i])
+                    return x[i].CompareTo(y[i]);
+            }
+            return x.Length.CompareTo(y.Length);
+        });
 
         List<string> totalNodes = knots.Concat(gateway).ToList();
 
