@@ -16,7 +16,6 @@ class Program
             currentPath = BFS(ref graph, graph.Virus);
             if (!first) graph.Virus = currentPath.Last().Item1;
             else first = false;
-            //Console.WriteLine("Virus in " + graph.Nodes[graph.Virus]);
         }
 
         return graph.Determination;
