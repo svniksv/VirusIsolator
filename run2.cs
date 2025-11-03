@@ -52,7 +52,6 @@ class Program
             for (int i = end + 1; i < graph.Nodes.Length; i++)
                 if (distances[end] > distances[i] && distances[i] != -1) end = i;
         }
-
         
         List<string> allShortPath = RecreatePath(graph, distances, end);
         //реверсируем и сортируем все пути, чтобы найти лексикографически меньший
@@ -60,26 +59,12 @@ class Program
             allShortPath[i] = new string(allShortPath[i].ToCharArray().Reverse().ToArray());
 
         //сортируем массив
-        allShortPath.Sort((path1, path2) =>
-        {
-            var nodes1 = path1.Split('-');
-            var nodes2 = path2.Split('-');
+        allShortPath.Sort();
 
-            for (int i = 0; i < path1.Length; i++)
-            {
-                if (nodes1[i].Length != nodes2[i].Length) return nodes1[i].Length.CompareTo(nodes2[i].Length);
-                int comparison = string.Compare(nodes1[i], nodes2[i]);
-                if (comparison != 0) return comparison;
-            }
-            return 0;
-        });
-
-        //Console.WriteLine("Path: " + allShortPath[0]);
         var firstPath = allShortPath[0].Split("-");
         //двигаем вирус в каждой итерации кроме первой 
         if (!first) graph.Virus = Array.IndexOf(graph.Nodes, firstPath[1]);
         else first = false;
-        //Console.WriteLine("Virus in " + graph.Nodes[graph.Virus]);
 
         //отключение шлюза
         List<string> gatewayConnections= new List<string>();
@@ -88,18 +73,8 @@ class Program
             var nodes = p.Split("-");
             gatewayConnections.Add(nodes[nodes.Length - 2]);
         }
-
-        gatewayConnections.Sort((x, y) =>
-        {
-            if (x.Length != y.Length) return x.Length.CompareTo(y.Length);
-            int minLength = Math.Min(x.Length, y.Length);
-            for (int i = 0; i < minLength; i++)
-            {
-                if (x[i] != y[i])
-                    return x[i].CompareTo(y[i]);
-            }
-            return x.Length.CompareTo(y.Length);
-        });
+       
+        gatewayConnections.Sort();
 
         if (graph.GraphMatrix[graph.Virus, end] == 1) graph.Determination.Add(graph.RemoveConnection((end, graph.Virus)));
         else graph.Determination.Add(graph.RemoveConnection((end, Array.IndexOf(graph.Nodes, gatewayConnections[0]))));
@@ -146,7 +121,6 @@ class Program
                 }
             }
         }
-
 
         var result = Solve(edges);
         foreach (var edge in result)
@@ -233,29 +207,8 @@ public class Graph
             }
         }
 
-        knots.Sort((x, y) =>
-        {
-            if (x.Length != y.Length) return x.Length.CompareTo(y.Length);
-            int minLength = Math.Min(x.Length, y.Length);
-            for (int i = 0; i < minLength; i++)
-            {
-                if (x[i] != y[i])
-                    return x[i].CompareTo(y[i]);
-            }
-            return x.Length.CompareTo(y.Length);
-        });
-
-        gateway.Sort((x, y) =>
-        {
-            if (x.Length != y.Length) return x.Length.CompareTo(y.Length);
-            int minLength = Math.Min(x.Length, y.Length);
-            for (int i = 0; i < minLength; i++)
-            {
-                if (x[i] != y[i])
-                    return x[i].CompareTo(y[i]);
-            }
-            return x.Length.CompareTo(y.Length);
-        });
+        knots.Sort();
+        gateway.Sort();
 
         List<string> totalNodes = knots.Concat(gateway).ToList();
 
