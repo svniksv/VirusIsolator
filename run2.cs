@@ -82,18 +82,28 @@ class Program
         //Console.WriteLine("Virus in " + graph.Nodes[graph.Virus]);
 
         //отключение шлюза
-        if (graph.GraphMatrix[graph.Virus, end] == 1) graph.Determination.Add(graph.RemoveConnection((end, graph.Virus)));
-        else
+        List<string> gatewayConnections= new List<string>();
+        foreach (var p in allShortPath)
         {
-            for (int i = 0; i < graph.Nodes.Length; i++)
-            {
-                if (graph.GraphMatrix[end, i] == 1)
-                {
-                    graph.Determination.Add(graph.RemoveConnection((end, i)));
-                    break;
-                }
-            }
+            var nodes = p.Split("-");
+            gatewayConnections.Add(nodes[nodes.Length - 2]);
         }
+
+        gatewayConnections.Sort((x, y) =>
+        {
+            if (x.Length != y.Length) return x.Length.CompareTo(y.Length);
+            int minLength = Math.Min(x.Length, y.Length);
+            for (int i = 0; i < minLength; i++)
+            {
+                if (x[i] != y[i])
+                    return x[i].CompareTo(y[i]);
+            }
+            return x.Length.CompareTo(y.Length);
+        });
+
+        if (graph.GraphMatrix[graph.Virus, end] == 1) graph.Determination.Add(graph.RemoveConnection((end, graph.Virus)));
+        else graph.Determination.Add(graph.RemoveConnection((end, Array.IndexOf(graph.Nodes, gatewayConnections[0]))));
+        
     }
 
     //получаем все возмжные кратчайшие пути до шлюза
@@ -136,6 +146,7 @@ class Program
                 }
             }
         }
+
 
         var result = Solve(edges);
         foreach (var edge in result)
