@@ -67,16 +67,19 @@ class Program
 
             for (int i = 0; i < path1.Length; i++)
             {
+                if (nodes1[i].Length != nodes2[i].Length) return nodes1[i].Length.CompareTo(nodes2[i].Length);
                 int comparison = string.Compare(nodes1[i], nodes2[i]);
                 if (comparison != 0) return comparison;
             }
             return 0;
         });
 
+        //Console.WriteLine("Path: " + allShortPath[0]);
         var firstPath = allShortPath[0].Split("-");
         //двигаем вирус в каждой итерации кроме первой 
         if (!first) graph.Virus = Array.IndexOf(graph.Nodes, firstPath[1]);
         else first = false;
+        //Console.WriteLine("Virus in " + graph.Nodes[graph.Virus]);
 
         //отключение шлюза
         if (graph.GraphMatrix[graph.Virus, end] == 1) graph.Determination.Add(graph.RemoveConnection((end, graph.Virus)));
