@@ -60,8 +60,8 @@ class Program
 
         //сортируем массив
         allShortPath.Sort();
-
         var firstPath = allShortPath[0].Split("-");
+
         //двигаем вирус в каждой итерации кроме первой 
         if (!first) graph.Virus = Array.IndexOf(graph.Nodes, firstPath[1]);
         else first = false;
