@@ -73,7 +73,6 @@ class Program
             var nodes = p.Split("-");
             gatewayConnections.Add(nodes[nodes.Length - 2]);
         }
-       
         gatewayConnections.Sort();
 
         if (graph.GraphMatrix[graph.Virus, end] == 1) graph.Determination.Add(graph.RemoveConnection((end, graph.Virus)));
